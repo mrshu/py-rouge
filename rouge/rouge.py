@@ -24,7 +24,10 @@ class Rouge:
     WORDNET_DB_DELIMITER = '|'
     STEMMER = None
 
-    def __init__(self, metrics=None, max_n=None, limit_length=True, length_limit=665, length_limit_type='bytes', apply_avg=True, apply_best=False, stemming=True, alpha=0.5, weight_factor=1.0, ensure_compatibility=True):
+    def __init__(self, metrics=None, max_n=None, limit_length=True,
+                 length_limit=665, length_limit_type='bytes', apply_avg=True,
+                 apply_best=False, stemming=True, alpha=0.5, weight_factor=1.0,
+                 ensure_compatibility=True, stemmer=None):
         """
         Handle the ROUGE score computation as in the official perl script.
 
@@ -86,16 +89,19 @@ class Rouge:
         if len(Rouge.WORDNET_KEY_VALUE) == 0:
             Rouge.load_wordnet_db(ensure_compatibility)
         if Rouge.STEMMER is None:
-            Rouge.load_stemmer(ensure_compatibility)
+            Rouge.load_stemmer(ensure_compatibility, stemmer)
 
     @staticmethod
-    def load_stemmer(ensure_compatibility):
+    def load_stemmer(ensure_compatibility, stemmer=None):
         """
         Load the stemmer that is going to be used if stemming is enabled
         Args
             ensure_compatibility: Use same stemmer and special "hacks" to product same results as in the official perl script (besides the number of sampling if not high enough)
         """
-        Rouge.STEMMER = nltk.stem.porter.PorterStemmer('ORIGINAL_ALGORITHM') if ensure_compatibility else nltk.stem.porter.PorterStemmer()
+        if stemmer:
+            Rouge.STEMMER = stemmer
+        else:
+            Rouge.STEMMER = nltk.stem.porter.PorterStemmer('ORIGINAL_ALGORITHM') if ensure_compatibility else nltk.stem.porter.PorterStemmer()
 
     @staticmethod
     def load_wordnet_db(ensure_compatibility):
